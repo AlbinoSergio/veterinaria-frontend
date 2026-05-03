@@ -3,8 +3,9 @@
  *
  * Ahora:
  * ✔ lista clientes
- * ✔ permite crear nuevos clientes
- * ✔ incluye DIRECCIÓN (nuevo)
+ * ✔ crear cliente
+ * ✔ editar cliente ( NUEVO)
+ * ✔ incluye DIRECCIÓN
  *
  * Tecnologías:
  * - React (estado + eventos)
@@ -14,19 +15,24 @@
 
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import { getClientes, crearCliente } from "../api/clientes";
+
+//  MODIFICADO: agregamos actualizarCliente
+import { getClientes, crearCliente, actualizarCliente, eliminarCliente  } from "../api/clientes";
 
 export default function Clientes() {
 
   // Lista de clientes
   const [clientes, setClientes] = useState([]);
 
-  // 🔥 MODIFICADO: agregamos direccion al estado
+  //  NUEVO: estado para saber si estamos editando
+  const [editandoId, setEditandoId] = useState(null);
+
+  // Estado del formulario
   const [nuevoCliente, setNuevoCliente] = useState({
     apellidoPrincipal: "",
     email: "",
     telefono: "",
-    direccion: "", // ✅ NUEVO CAMPO
+    direccion: "",
   });
 
   // Cargar clientes al iniciar
@@ -34,7 +40,6 @@ export default function Clientes() {
     cargarClientes();
   }, []);
 
-  // Función para traer clientes del backend
   const cargarClientes = () => {
     getClientes().then(setClientes);
   };
@@ -50,41 +55,74 @@ export default function Clientes() {
   };
 
   /**
-   * Crear cliente
+   *  NUEVO: cargar datos en el formulario para editar
+   */
+  const handleEditar = (cliente) => {
+    setNuevoCliente({
+      apellidoPrincipal: cliente.apellidoPrincipal,
+      email: cliente.email,
+      telefono: cliente.telefono,
+      direccion: cliente.direccion || "",
+    });
+
+    setEditandoId(cliente.id); // guardamos qué cliente estamos editando
+  };
+
+  /**
+ * NUEVO: eliminar cliente
+ */
+const handleEliminar = async (id) => {
+
+  // Confirmación (muy importante UX básica)
+  const confirmar = window.confirm("¿Seguro que querés eliminar este cliente?");
+
+  if (!confirmar) return;
+
+  await eliminarCliente(id);
+
+  cargarClientes(); // refresca tabla
+};
+
+  /**
+   * Crear o actualizar cliente
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔥 MODIFICADO: ahora incluye direccion real del form
     const clienteCompleto = {
       ...nuevoCliente,
-
-      // ⚠️ Estos los dejamos temporalmente
       codigo: "AUTO",
       cuentaBancaria: "000",
     };
 
-    await crearCliente(clienteCompleto);
+    if (editandoId) {
+      //  NUEVO: UPDATE
+      await actualizarCliente(editandoId, clienteCompleto);
+    } else {
+      // CREATE
+      await crearCliente(clienteCompleto);
+    }
 
     cargarClientes();
 
-    // 🔥 MODIFICADO: limpiamos también direccion
+    // reset form
     setNuevoCliente({
       apellidoPrincipal: "",
       email: "",
       telefono: "",
-      direccion: "", // ✅ limpiar también
+      direccion: "",
     });
+
+    setEditandoId(null); //  NUEVO: salir de modo edición
   };
 
   return (
     <Layout>
       <h1 className="text-2xl font-bold mb-4">Clientes</h1>
 
-      {/* 🔵 FORMULARIO */}
+      {/*  FORMULARIO */}
       <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-6">
 
-        {/* 🔥 MODIFICADO: ahora 4 columnas en vez de 3 */}
         <div className="grid grid-cols-4 gap-4">
 
           <input
@@ -114,7 +152,6 @@ export default function Clientes() {
             className="border p-2 rounded"
           />
 
-          {/* 🔥 NUEVO INPUT: DIRECCIÓN */}
           <input
             type="text"
             name="direccion"
@@ -126,8 +163,9 @@ export default function Clientes() {
 
         </div>
 
+        {/*  MODIFICADO: cambia el texto según si editás o creás */}
         <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
-          Crear Cliente
+          {editandoId ? "Actualizar Cliente" : "Crear Cliente"}
         </button>
 
       </form>
@@ -140,9 +178,10 @@ export default function Clientes() {
               <th className="text-left p-2">Apellido</th>
               <th className="text-left p-2">Email</th>
               <th className="text-left p-2">Teléfono</th>
-
-              {/* 🔥 NUEVA COLUMNA */}
               <th className="text-left p-2">Dirección</th>
+
+              {/*  NUEVO */}
+              <th className="text-left p-2">Acciones</th>
             </tr>
           </thead>
 
@@ -152,9 +191,29 @@ export default function Clientes() {
                 <td className="p-2">{c.apellidoPrincipal}</td>
                 <td className="p-2">{c.email}</td>
                 <td className="p-2">{c.telefono}</td>
-
-                {/* 🔥 NUEVO CAMPO */}
                 <td className="p-2">{c.direccion}</td>
+
+                {/*  NUEVO: botón editar */}
+                <td className="p-2">
+                  <div className="flex gap-2">
+                    
+                    <button
+                      onClick={() => handleEditar(c)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      onClick={() => handleEliminar(c.id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                    >
+                      Eliminar
+                    </button>
+
+                  </div>
+                </td>
+
               </tr>
             ))}
           </tbody>

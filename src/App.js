@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import Reportes from "./pages/Reportes";
 
+import PrivateRoute from "./components/PrivateRoute";
+
 /**
  * Este archivo es el "punto de entrada visual" de la app
  * Aquí definimos qué pantalla se muestra según la URL
@@ -28,13 +30,34 @@ function App() {
         <Route path="/" element={<Login />} />
 
         {/* Dashboard principal */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
 
         {/* Página de clientes */}
-        <Route path="/clientes" element={<Clientes />} />
+        <Route
+            path="/clientes"
+            element={
+              <PrivateRoute>
+                <Clientes />
+              </PrivateRoute>
+            }
+          />
 
         {/* Página de reportes */}
-        <Route path="/reportes" element={<Reportes />} />
+        <Route
+            path="/reportes"
+            element={
+              <PrivateRoute>
+                  <Reportes />
+              </PrivateRoute>
+            }
+          />
 
       </Routes>
 
