@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import Reportes from "./pages/Reportes";
+import Mascotas from "./pages/Mascotas";
 
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -48,6 +49,16 @@ function App() {
               </PrivateRoute>
             }
           />
+
+        {/* Página de mascotas */}
+          <Route
+              path="/mascotas"
+              element={
+                <PrivateRoute>
+                  <Mascotas />
+                </PrivateRoute>
+              }
+            />
 
         {/* Página de reportes */}
         <Route

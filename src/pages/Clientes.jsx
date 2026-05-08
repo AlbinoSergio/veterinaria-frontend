@@ -1,33 +1,21 @@
 /**
  * Página de Clientes
  *
- * Ahora:
  * ✔ lista clientes
  * ✔ crear cliente
- * ✔ editar cliente ( NUEVO)
- * ✔ incluye DIRECCIÓN
- *
- * Tecnologías:
- * - React (estado + eventos)
- * - Tailwind (UI)
- * - Fetch API (backend)
+ * ✔ editar cliente (🔥 TODOS)
+ * ✔ eliminar cliente (🔥 solo ADMIN)
  */
 
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
-
-//  MODIFICADO: agregamos actualizarCliente
-import { getClientes, crearCliente, actualizarCliente, eliminarCliente  } from "../api/clientes";
+import { getClientes, crearCliente, eliminarCliente } from "../api/clientes";
+import { getUser } from "../api/auth";
 
 export default function Clientes() {
 
-  // Lista de clientes
   const [clientes, setClientes] = useState([]);
 
-  //  NUEVO: estado para saber si estamos editando
-  const [editandoId, setEditandoId] = useState(null);
-
-  // Estado del formulario
   const [nuevoCliente, setNuevoCliente] = useState({
     apellidoPrincipal: "",
     email: "",
@@ -35,7 +23,11 @@ export default function Clientes() {
     direccion: "",
   });
 
-  // Cargar clientes al iniciar
+  // 🔥 NUEVO: estado para saber si estamos editando
+  const [editando, setEditando] = useState(null);
+
+  const user = getUser();
+
   useEffect(() => {
     cargarClientes();
   }, []);
@@ -44,9 +36,6 @@ export default function Clientes() {
     getClientes().then(setClientes);
   };
 
-  /**
-   * Maneja cambios en inputs
-   */
   const handleChange = (e) => {
     setNuevoCliente({
       ...nuevoCliente,
@@ -55,36 +44,9 @@ export default function Clientes() {
   };
 
   /**
-   *  NUEVO: cargar datos en el formulario para editar
-   */
-  const handleEditar = (cliente) => {
-    setNuevoCliente({
-      apellidoPrincipal: cliente.apellidoPrincipal,
-      email: cliente.email,
-      telefono: cliente.telefono,
-      direccion: cliente.direccion || "",
-    });
-
-    setEditandoId(cliente.id); // guardamos qué cliente estamos editando
-  };
-
-  /**
- * NUEVO: eliminar cliente
- */
-const handleEliminar = async (id) => {
-
-  // Confirmación (muy importante UX básica)
-  const confirmar = window.confirm("¿Seguro que querés eliminar este cliente?");
-
-  if (!confirmar) return;
-
-  await eliminarCliente(id);
-
-  cargarClientes(); // refresca tabla
-};
-
-  /**
-   * Crear o actualizar cliente
+   * 🔥 MODIFICADO:
+   * - si estamos editando → actualizar
+   * - si no → crear
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,32 +57,46 @@ const handleEliminar = async (id) => {
       cuentaBancaria: "000",
     };
 
-    if (editandoId) {
-      //  NUEVO: UPDATE
-      await actualizarCliente(editandoId, clienteCompleto);
+    if (editando) {
+      // 🔥 EDITAR
+      await fetch(`http://localhost:8080/clientes/${editando.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(clienteCompleto),
+      });
+
+      setEditando(null); // salir de modo edición
     } else {
-      // CREATE
+      // 🔥 CREAR
       await crearCliente(clienteCompleto);
     }
 
     cargarClientes();
 
-    // reset form
     setNuevoCliente({
       apellidoPrincipal: "",
       email: "",
       telefono: "",
       direccion: "",
     });
+  };
 
-    setEditandoId(null); //  NUEVO: salir de modo edición
+  /**
+   * 🔥 NUEVO: cargar datos al formulario para editar
+   */
+  const handleEditar = (cliente) => {
+    setNuevoCliente(cliente);
+    setEditando(cliente);
   };
 
   return (
     <Layout>
       <h1 className="text-2xl font-bold mb-4">Clientes</h1>
 
-      {/*  FORMULARIO */}
+      {/* FORMULARIO */}
       <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-6">
 
         <div className="grid grid-cols-4 gap-4">
@@ -163,14 +139,14 @@ const handleEliminar = async (id) => {
 
         </div>
 
-        {/*  MODIFICADO: cambia el texto según si editás o creás */}
+        {/* 🔥 TEXTO DINÁMICO */}
         <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
-          {editandoId ? "Actualizar Cliente" : "Crear Cliente"}
+          {editando ? "Actualizar Cliente" : "Crear Cliente"}
         </button>
 
       </form>
 
-      {/* 🔵 TABLA */}
+      {/* TABLA */}
       <div className="bg-white rounded shadow p-4">
         <table className="w-full">
           <thead>
@@ -179,8 +155,6 @@ const handleEliminar = async (id) => {
               <th className="text-left p-2">Email</th>
               <th className="text-left p-2">Teléfono</th>
               <th className="text-left p-2">Dirección</th>
-
-              {/*  NUEVO */}
               <th className="text-left p-2">Acciones</th>
             </tr>
           </thead>
@@ -193,25 +167,26 @@ const handleEliminar = async (id) => {
                 <td className="p-2">{c.telefono}</td>
                 <td className="p-2">{c.direccion}</td>
 
-                {/*  NUEVO: botón editar */}
-                <td className="p-2">
-                  <div className="flex gap-2">
-                    
-                    <button
-                      onClick={() => handleEditar(c)}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
-                    >
-                      Editar
-                    </button>
+                <td className="p-2 flex gap-2">
 
+                  {/* 🔥 EDITAR → TODOS */}
+                  <button
+                    onClick={() => handleEditar(c)}
+                    className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                  >
+                    Editar
+                  </button>
+
+                  {/* 🔥 ELIMINAR → SOLO ADMIN */}
+                  {user?.rol === "ADMIN" && (
                     <button
-                      onClick={() => handleEliminar(c.id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                      onClick={() => eliminarCliente(c.id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                     >
                       Eliminar
                     </button>
+                  )}
 
-                  </div>
                 </td>
 
               </tr>
