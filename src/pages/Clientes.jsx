@@ -151,6 +151,9 @@ export default function Clientes() {
         <table className="w-full">
           <thead>
             <tr className="border-b">
+              {/* NUEVO: código visible del cliente */}
+              <th className="text-left p-2">Nro Cliente</th>
+
               <th className="text-left p-2">Apellido</th>
               <th className="text-left p-2">Email</th>
               <th className="text-left p-2">Teléfono</th>
@@ -162,6 +165,11 @@ export default function Clientes() {
           <tbody>
             {clientes.map((c) => (
               <tr key={c.id} className="border-b hover:bg-gray-50">
+                {/*  NUEVO: mostramos código negocio */}
+                <td className="p-2 font-medium text-blue-700">
+                  {c.codigo}
+                </td>
+
                 <td className="p-2">{c.apellidoPrincipal}</td>
                 <td className="p-2">{c.email}</td>
                 <td className="p-2">{c.telefono}</td>

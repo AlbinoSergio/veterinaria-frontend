@@ -22,10 +22,16 @@ import {
   actualizarMascota
 } from "../api/mascotas";
 
+import { getClientes } from "../api/clientes";
+
 export default function Mascotas() {
 
-  // 🔥 lista de mascotas
+  //  lista de mascotas
   const [mascotas, setMascotas] = useState([]);
+
+  //  NUEVO:
+// lista de clientes para selector
+const [clientes, setClientes] = useState([]);
 
   // 🔥 estado formulario
   const [form, setForm] = useState({
@@ -37,14 +43,17 @@ export default function Mascotas() {
     clienteId: ""
   });
 
-  // 🔥 controla edición
+  //  controla edición
   const [editandoId, setEditandoId] = useState(null);
 
   /**
    * Cargar mascotas al abrir pantalla
    */
   useEffect(() => {
+
     cargarMascotas();
+    cargarClientes();
+
   }, []);
 
   /**
@@ -55,6 +64,21 @@ export default function Mascotas() {
     const data = await getMascotas();
 
     setMascotas(data);
+  };
+
+  /**
+   * 🔥 NUEVO:
+   * Obtener clientes desde backend
+   *
+   * Qué hace:
+   * - consulta clientes
+   * - llena selector de dueños
+   */
+  const cargarClientes = async () => {
+
+    const data = await getClientes();
+
+    setClientes(data);
   };
 
   /**
@@ -85,8 +109,8 @@ export default function Mascotas() {
       await crearMascota(form);
     }
 
-    // 🔥 recargar lista
-    cargarMascotas();
+   // 🔥 recargar lista
+  cargarMascotas();
 
     // 🔥 reset formulario
     setForm({
@@ -173,14 +197,34 @@ export default function Mascotas() {
             className="border p-2 rounded"
           />
 
-          <input
-            type="number"
+          {/* 🔥 NUEVO:
+            selector real de clientes */}
+          <select
             name="clienteId"
-            placeholder="ID Cliente"
             value={form.clienteId}
             onChange={handleChange}
             className="border p-2 rounded"
-          />
+          >
+
+            {/* opción vacía */}
+            <option value="">
+              Seleccionar dueño
+            </option>
+
+            {/* 🔥 recorremos clientes */}
+            {clientes.map((c) => (
+
+              <option
+                key={c.id}
+                value={c.id}
+              >
+
+                {c.codigo} - {c.apellidoPrincipal}
+
+              </option>
+            ))}
+
+          </select>
 
         </div>
 
@@ -201,12 +245,12 @@ export default function Mascotas() {
 
             <tr className="border-b">
 
-              <th className="text-left p-2">Código</th>
+              <th className="text-left p-2">Nro Mascota</th>
               <th className="text-left p-2">Nombre</th>
               <th className="text-left p-2">Especie</th>
               <th className="text-left p-2">Raza</th>
               <th className="text-left p-2">Color</th>
-              <th className="text-left p-2">Cliente ID</th>
+              <th className="text-left p-2">Dueño</th>
               <th className="text-left p-2">Acciones</th>
 
             </tr>
@@ -227,7 +271,13 @@ export default function Mascotas() {
                 <td className="p-2">{m.especie}</td>
                 <td className="p-2">{m.raza}</td>
                 <td className="p-2">{m.color}</td>
-                <td className="p-2">{m.clienteId}</td>
+                {/* NUEVO:
+                  mostramos código + apellido del cliente */}
+                <td className="p-2 font-medium text-blue-700">
+
+                  {m.clienteCodigo} - {m.clienteApellido}
+
+                </td>
 
                 <td className="p-2">
 
