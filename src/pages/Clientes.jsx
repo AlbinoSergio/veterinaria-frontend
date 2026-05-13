@@ -3,14 +3,16 @@
  *
  * ✔ lista clientes
  * ✔ crear cliente
- * ✔ editar cliente (🔥 TODOS)
- * ✔ eliminar cliente (🔥 solo ADMIN)
+ * ✔ editar cliente ( TODOS)
+ * ✔ eliminar cliente ( solo ADMIN)
  */
 
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { getClientes, crearCliente, eliminarCliente } from "../api/clientes";
 import { getUser } from "../api/auth";
+
+import { useNavigate } from "react-router-dom";
 
 export default function Clientes() {
 
@@ -23,10 +25,14 @@ export default function Clientes() {
     direccion: "",
   });
 
-  // 🔥 NUEVO: estado para saber si estamos editando
+  //  NUEVO: estado para saber si estamos editando
   const [editando, setEditando] = useState(null);
 
   const user = getUser();
+
+  // NUEVO:
+  // permite navegar entre páginas
+  const navigate = useNavigate();
 
   useEffect(() => {
     cargarClientes();
@@ -44,7 +50,7 @@ export default function Clientes() {
   };
 
   /**
-   * 🔥 MODIFICADO:
+   *  MODIFICADO:
    * - si estamos editando → actualizar
    * - si no → crear
    */
@@ -58,7 +64,7 @@ export default function Clientes() {
     };
 
     if (editando) {
-      // 🔥 EDITAR
+      //  EDITAR
       await fetch(`http://localhost:8080/clientes/${editando.id}`, {
         method: "PUT",
         headers: {
@@ -70,7 +76,7 @@ export default function Clientes() {
 
       setEditando(null); // salir de modo edición
     } else {
-      // 🔥 CREAR
+      //  CREAR
       await crearCliente(clienteCompleto);
     }
 
@@ -85,7 +91,7 @@ export default function Clientes() {
   };
 
   /**
-   * 🔥 NUEVO: cargar datos al formulario para editar
+   *  NUEVO: cargar datos al formulario para editar
    */
   const handleEditar = (cliente) => {
     setNuevoCliente(cliente);
@@ -139,7 +145,7 @@ export default function Clientes() {
 
         </div>
 
-        {/* 🔥 TEXTO DINÁMICO */}
+        {/*  TEXTO DINÁMICO */}
         <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
           {editando ? "Actualizar Cliente" : "Crear Cliente"}
         </button>
@@ -177,7 +183,7 @@ export default function Clientes() {
 
                 <td className="p-2 flex gap-2">
 
-                  {/* 🔥 EDITAR → TODOS */}
+                  {/*  EDITAR → TODOS */}
                   <button
                     onClick={() => handleEditar(c)}
                     className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
@@ -185,7 +191,7 @@ export default function Clientes() {
                     Editar
                   </button>
 
-                  {/* 🔥 ELIMINAR → SOLO ADMIN */}
+                  {/*  ELIMINAR → SOLO ADMIN */}
                   {user?.rol === "ADMIN" && (
                     <button
                       onClick={() => eliminarCliente(c.id)}
@@ -194,6 +200,15 @@ export default function Clientes() {
                       Eliminar
                     </button>
                   )}
+
+                  {/* NUEVO:
+                    navegar a mascotas del cliente */}
+                  <button
+                    onClick={() => navigate(`/mascotas?clienteId=${c.id}`)}
+                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                  >
+                    Mascotas
+                  </button>
 
                 </td>
 

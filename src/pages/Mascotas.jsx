@@ -24,6 +24,8 @@ import {
 
 import { getClientes } from "../api/clientes";
 
+import { useSearchParams } from "react-router-dom";
+
 export default function Mascotas() {
 
   //  lista de mascotas
@@ -45,6 +47,13 @@ const [clientes, setClientes] = useState([]);
 
   //  controla edición
   const [editandoId, setEditandoId] = useState(null);
+
+    // NUEVO:
+  // leer parámetros de URL
+  const [searchParams] = useSearchParams();
+
+  // obtenemos clienteId desde URL
+  const clienteIdFiltro = searchParams.get("clienteId");
 
   /**
    * Cargar mascotas al abrir pantalla
@@ -143,6 +152,17 @@ const [clientes, setClientes] = useState([]);
       <h1 className="text-2xl font-bold mb-6">
         Mascotas
       </h1>
+
+      {/* NUEVO:
+        banner contextual cuando hay filtro */}
+      {clienteIdFiltro && (
+
+        <div className="bg-blue-100 border border-blue-300 text-blue-800 p-3 rounded mb-4">
+
+          Mostrando mascotas del cliente seleccionado
+
+        </div>
+      )}
 
       {/* FORMULARIO */}
       <form
@@ -259,11 +279,31 @@ const [clientes, setClientes] = useState([]);
 
           <tbody>
 
-            {mascotas.map((m) => (
+            {mascotas
+              .filter((m) => {
+
+                //  si NO hay filtro → mostrar todas
+                if (!clienteIdFiltro) return true;
+
+                //  si hay filtro → solo mascotas del cliente
+                return m.clienteId === Number(clienteIdFiltro);
+              })
+              .map((m) => (
 
               <tr
                 key={m.id}
-                className="border-b hover:bg-gray-50"
+
+                className={`
+                  border-b hover:bg-gray-50
+
+                  ${
+                    clienteIdFiltro &&
+                    m.clienteId === Number(clienteIdFiltro)
+
+                    ? "bg-blue-50"
+                    : ""
+                  }
+                `}
               >
 
                 <td className="p-2">{m.codigo}</td>
