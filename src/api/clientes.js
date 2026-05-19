@@ -84,3 +84,19 @@ export const eliminarCliente = async (id) => {
     throw new Error("Error al eliminar cliente");
   }
 };
+
+/**
+ * Obtener cliente por ID
+ */
+export const getClienteById = async (id) => {
+
+  const res = await fetch(`${BASE_URL}/clientes/${id}`, {
+
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  });
+
+  return await res.json();
+};
+

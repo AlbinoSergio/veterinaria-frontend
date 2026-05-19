@@ -210,6 +210,13 @@ export default function Clientes() {
                     Mascotas
                   </button>
 
+                  <button
+                    onClick={() => navigate(`/clientes/${c.id}`)}
+                    className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+                  >
+                    Detalle
+                  </button>
+
                 </td>
 
               </tr>

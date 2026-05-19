@@ -26,21 +26,26 @@ import { getClientes } from "../api/clientes";
 
 import { useSearchParams } from "react-router-dom";
 
+import { obtenerEspecies } from "../api/especies";
+import { obtenerRazasPorEspecie } from "../api/razas";
+
 export default function Mascotas() {
 
-  //  lista de mascotas
-  const [mascotas, setMascotas] = useState([]);
+//  lista de mascotas
+const [mascotas, setMascotas] = useState([]);
 
-  //  NUEVO:
 // lista de clientes para selector
 const [clientes, setClientes] = useState([]);
 
-  // 🔥 estado formulario
+const [especies, setEspecies] = useState([]);
+const [razas, setRazas] = useState([]);
+
+  //  estado formulario
   const [form, setForm] = useState({
     codigo: "",
     alias: "",
-    especie: "",
-    raza: "",
+    especieId: "",
+    razaId: "",
     color: "",
     clienteId: ""
   });
@@ -48,7 +53,6 @@ const [clientes, setClientes] = useState([]);
   //  controla edición
   const [editandoId, setEditandoId] = useState(null);
 
-    // NUEVO:
   // leer parámetros de URL
   const [searchParams] = useSearchParams();
 
@@ -62,6 +66,7 @@ const [clientes, setClientes] = useState([]);
 
     cargarMascotas();
     cargarClientes();
+    cargarEspecies();
 
   }, []);
 
@@ -76,7 +81,7 @@ const [clientes, setClientes] = useState([]);
   };
 
   /**
-   * 🔥 NUEVO:
+   *  NUEVO:
    * Obtener clientes desde backend
    *
    * Qué hace:
@@ -88,6 +93,20 @@ const [clientes, setClientes] = useState([]);
     const data = await getClientes();
 
     setClientes(data);
+  };
+
+  const cargarEspecies = async () => {
+
+  try {
+
+    const data = await obtenerEspecies();
+
+    setEspecies(data);
+
+    } catch (error) {
+
+    console.error(error);
+    }
   };
 
   /**
@@ -108,7 +127,7 @@ const [clientes, setClientes] = useState([]);
 
     e.preventDefault();
 
-    // 🔥 si estamos editando
+    //  si estamos editando
     if (editandoId) {
 
       await actualizarMascota(editandoId, form);
@@ -118,32 +137,72 @@ const [clientes, setClientes] = useState([]);
       await crearMascota(form);
     }
 
-   // 🔥 recargar lista
+   //  recargar lista
   cargarMascotas();
 
-    // 🔥 reset formulario
+    //  reset formulario
     setForm({
       codigo: "",
       alias: "",
-      especie: "",
-      raza: "",
+      especieId: "",
+      razaId: "",
       color: "",
       clienteId: ""
     });
 
-    // 🔥 salir modo edición
+    //  salir modo edición
     setEditandoId(null);
   };
 
   /**
    * Cargar mascota en formulario
    */
-  const handleEditar = (mascota) => {
+  const handleEditar = async (mascota) => {
 
-    setForm(mascota);
+    // 🔥 NUEVO:
+    // cargamos razas según la especie de la mascota
+    const data = await obtenerRazasPorEspecie(
+      mascota.especieId
+    );
+
+    setRazas(data);
+
+    // 🔥 MODIFICADO:
+    // cargamos SOLO campos necesarios
+    setForm({
+      codigo: mascota.codigo,
+      alias: mascota.alias,
+      especieId: mascota.especieId,
+      razaId: mascota.razaId,
+      color: mascota.color,
+      clienteId: mascota.clienteId
+    });
 
     setEditandoId(mascota.id);
   };
+
+  const handleEspecieChange = async (e) => {
+
+    const especieId = e.target.value;
+
+    setForm({
+      ...form,
+      especieId,
+      razaId: ""
+    });
+
+    try {
+
+      const data = await obtenerRazasPorEspecie(especieId);
+
+      setRazas(data);
+
+    } catch (error) {
+
+      console.error(error);
+    }
+  };
+
 
   return (
     <Layout>
@@ -190,23 +249,47 @@ const [clientes, setClientes] = useState([]);
             className="border p-2 rounded"
           />
 
-          <input
-            type="text"
-            name="especie"
-            placeholder="Especie"
-            value={form.especie}
-            onChange={handleChange}
+          <select
+            name="especieId"
+            value={form.especieId}
+            onChange={handleEspecieChange}
             className="border p-2 rounded"
-          />
+          >
 
-          <input
-            type="text"
-            name="raza"
-            placeholder="Raza"
-            value={form.raza}
+            <option value="">
+              Seleccionar especie
+            </option>
+
+            {especies.map((e) => (
+
+              <option key={e.id} value={e.id}>
+                {e.nombre}
+              </option>
+
+            ))}
+
+          </select>
+
+          <select
+            name="razaId"
+            value={form.razaId}
             onChange={handleChange}
             className="border p-2 rounded"
-          />
+          >
+
+            <option value="">
+              Seleccionar raza
+            </option>
+
+            {razas.map((r) => (
+
+              <option key={r.id} value={r.id}>
+                {r.nombre}
+              </option>
+
+            ))}
+
+          </select>
 
           <input
             type="text"
@@ -217,7 +300,7 @@ const [clientes, setClientes] = useState([]);
             className="border p-2 rounded"
           />
 
-          {/* 🔥 NUEVO:
+          {/*  NUEVO:
             selector real de clientes */}
           <select
             name="clienteId"
@@ -231,7 +314,7 @@ const [clientes, setClientes] = useState([]);
               Seleccionar dueño
             </option>
 
-            {/* 🔥 recorremos clientes */}
+            {/*  recorremos clientes */}
             {clientes.map((c) => (
 
               <option
@@ -308,8 +391,12 @@ const [clientes, setClientes] = useState([]);
 
                 <td className="p-2">{m.codigo}</td>
                 <td className="p-2">{m.alias}</td>
-                <td className="p-2">{m.especie}</td>
-                <td className="p-2">{m.raza}</td>
+                <td className="p-2 font-medium">
+                  {m.especieNombre}
+                </td>
+                <td className="p-2">
+                  {m.razaNombre}
+                </td>
                 <td className="p-2">{m.color}</td>
                 {/* NUEVO:
                   mostramos código + apellido del cliente */}

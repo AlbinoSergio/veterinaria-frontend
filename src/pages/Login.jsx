@@ -92,8 +92,7 @@ export default function Login() {
       style={{ backgroundImage: `url(${bgImage})` }}
     >
 
-      {/* 🔵 OVERLAY SUAVE (reduce brillo del fondo) */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-white/10"></div>
+      <div className="absolute inset-0 bg-white/5"></div>
 
       {/* 🔵 CONTENEDOR DERECHO */}
       <div className="relative w-full md:w-1/2 flex justify-center items-center">

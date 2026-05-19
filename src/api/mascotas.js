@@ -65,3 +65,17 @@ export const actualizarMascota = async (id, mascota) => {
   return await res.json();
 };
 
+/**
+ * Obtener mascotas por cliente
+ */
+export const getMascotasPorCliente = async (clienteId) => {
+
+  const res = await fetch(`${BASE_URL}/mascotas/cliente/${clienteId}`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  });
+
+  return await res.json();
+};
+

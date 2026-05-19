@@ -8,7 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import Reportes from "./pages/Reportes";
 import Mascotas from "./pages/Mascotas";
-
+import DetalleCliente from "./pages/DetalleCliente";
 import PrivateRoute from "./components/PrivateRoute";
 
 /**
@@ -46,6 +46,15 @@ function App() {
             element={
               <PrivateRoute>
                 <Clientes />
+              </PrivateRoute>
+            }
+          />
+
+        <Route
+            path="/clientes/:id"
+            element={
+              <PrivateRoute>
+                <DetalleCliente />
               </PrivateRoute>
             }
           />
