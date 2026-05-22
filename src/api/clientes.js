@@ -21,7 +21,12 @@ export const getClientes = async () => {
     },
   });
 
-  return res.json();
+  if (!res.ok) {
+
+  throw new Error("Error al obtener clientes");
+  }
+
+  return await res.json();
 };
 
 /**

@@ -24,7 +24,7 @@ import {
 
 import { getClientes } from "../api/clientes";
 
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 import { obtenerEspecies } from "../api/especies";
 import { obtenerRazasPorEspecie } from "../api/razas";
@@ -55,6 +55,9 @@ const [razas, setRazas] = useState([]);
 
   // leer parámetros de URL
   const [searchParams] = useSearchParams();
+
+  // navegación entre pantallas
+  const navigate = useNavigate();
 
   // obtenemos clienteId desde URL
   const clienteIdFiltro = searchParams.get("clienteId");
@@ -159,7 +162,7 @@ const [razas, setRazas] = useState([]);
    */
   const handleEditar = async (mascota) => {
 
-    // 🔥 NUEVO:
+    //  NUEVO:
     // cargamos razas según la especie de la mascota
     const data = await obtenerRazasPorEspecie(
       mascota.especieId
@@ -167,7 +170,7 @@ const [razas, setRazas] = useState([]);
 
     setRazas(data);
 
-    // 🔥 MODIFICADO:
+    //  MODIFICADO:
     // cargamos SOLO campos necesarios
     setForm({
       codigo: mascota.codigo,
@@ -179,6 +182,14 @@ const [razas, setRazas] = useState([]);
     });
 
     setEditandoId(mascota.id);
+  };
+
+  /**
+  * Ir a ficha clínica de mascota
+  */
+  const handleFichaClinica = (id) => {
+
+    navigate(`/mascotas/${id}`);
   };
 
   const handleEspecieChange = async (e) => {
@@ -413,6 +424,13 @@ const [razas, setRazas] = useState([]);
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
                   >
                     Editar
+                  </button>
+
+                  <button
+                    onClick={() => handleFichaClinica(m.id)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded ml-2"
+                  >
+                    Ficha Clínica
                   </button>
 
                 </td>

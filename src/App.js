@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import Reportes from "./pages/Reportes";
 import Mascotas from "./pages/Mascotas";
+import DetalleMascota from "./pages/DetalleMascota";
 import DetalleCliente from "./pages/DetalleCliente";
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -65,6 +66,15 @@ function App() {
               element={
                 <PrivateRoute>
                   <Mascotas />
+                </PrivateRoute>
+              }
+            />
+
+          <Route
+              path="/mascotas/:id"
+              element={
+                <PrivateRoute>
+                  <DetalleMascota />
                 </PrivateRoute>
               }
             />

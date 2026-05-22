@@ -74,8 +74,8 @@ export default function Login() {
       
       await login(form); // ya guarda token internamente
 
-      // redirige al dashboard
-      navigate("/dashboard");
+      // redirige a clientes
+      navigate("/clientes");
 
     } catch (err) {
       // 🔥 NUEVO: mostramos error elegante

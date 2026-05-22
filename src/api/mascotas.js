@@ -79,3 +79,23 @@ export const getMascotasPorCliente = async (clienteId) => {
   return await res.json();
 };
 
+/**
+ * Obtener mascota por ID
+ */
+export const getMascotaById = async (id) => {
+
+  const res = await fetch(`${BASE_URL}/mascotas/${id}`, {
+
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  });
+
+  if (!res.ok) {
+
+    throw new Error("Error al obtener mascota");
+  }
+
+  return await res.json();
+};
+

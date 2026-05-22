@@ -130,12 +130,12 @@ export default function DetalleCliente() {
 
                   <div>
                     <p className="text-sm text-gray-500">Especie</p>
-                    <p className="font-semibold">{m.especie}</p>
+                    <p className="font-semibold">{m.especieNombre}</p>
                   </div>
 
                   <div>
                     <p className="text-sm text-gray-500">Raza</p>
-                    <p className="font-semibold">{m.raza}</p>
+                    <p className="font-semibold">{m.razaNombre}</p>
                   </div>
 
                 </div>

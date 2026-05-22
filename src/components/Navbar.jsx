@@ -26,11 +26,7 @@ export default function Navbar() {
       <h1 className="text-lg font-bold">🐾 Veterinaria</h1>
 
       <div className="space-x-6 flex items-center">
-
-        <Link to="/dashboard" className="hover:text-gray-200">
-          Dashboard
-        </Link>
-
+        
         <Link to="/clientes" className="hover:text-gray-200">
           Clientes
         </Link>
@@ -39,18 +35,22 @@ export default function Navbar() {
           Mascotas
         </Link>
 
+        <Link to="/dashboard" className="hover:text-gray-200">
+          Dashboard
+        </Link>
+
         <Link to="/reportes" className="hover:text-gray-200">
           Reportes
         </Link>
 
-        {/* 🔥 MODIFICADO: mostramos SOLO usuario (sin rol) */}
+        {/*  MODIFICADO: mostramos SOLO usuario (sin rol) */}
         {user && (
           <span className="ml-4 font-semibold">
             Usuario: {user.sub}
           </span>
         )}
 
-        {/* 🔥 Botón salir */}
+        {/*  Botón salir */}
         {user && (
           <button
             onClick={handleLogout}
@@ -64,3 +64,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
