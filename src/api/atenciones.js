@@ -56,3 +56,35 @@ export const crearAtencion = async (atencion) => {
 
   return await res.json();
 };
+
+/**
+ * Editar atención
+ */
+export const actualizarAtencion = async (
+  id,
+  atencion
+) => {
+
+  const res = await fetch(
+    `${BASE_URL}/atenciones/${id}`,
+    {
+      method: "PUT",
+
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`
+      },
+
+      body: JSON.stringify(atencion)
+    }
+  );
+
+  if (!res.ok) {
+
+    throw new Error(
+      "Error al actualizar atención"
+    );
+  }
+
+  return await res.json();
+};

@@ -12,7 +12,8 @@ import { getMascotaById } from "../api/mascotas";
 
 import {
   getAtencionesPorMascota,
-  crearAtencion
+  crearAtencion,
+  actualizarAtencion
 } from "../api/atenciones";
 
 /**
@@ -38,6 +39,11 @@ export default function DetalleMascota() {
    * Modal nueva atención
    */
   const [mostrarModal, setMostrarModal] = useState(false);
+
+  const [modoEdicion, setModoEdicion] = useState(false);
+
+  const [atencionEditando, setAtencionEditando] =
+  useState(null);
 
   /**
    * Formulario atención
@@ -66,15 +72,6 @@ export default function DetalleMascota() {
   });
 
   /**
-   * Cargar datos
-   */
-  useEffect(() => {
-
-    cargarDatos();
-
-  }, [cargarDatos]);
-
-  /**
    * Obtener mascota + historial
    */
   const cargarDatos = useCallback(async () => {
@@ -97,6 +94,15 @@ export default function DetalleMascota() {
     }
   }, [id]);
 
+    /**
+   * Cargar datos
+   */
+  useEffect(() => {
+
+    cargarDatos();
+
+  }, [cargarDatos]);
+
   /**
    * Manejo inputs atención
    */
@@ -114,6 +120,52 @@ export default function DetalleMascota() {
     });
   };
 
+    /**
+   * Abrir modal edición
+   */
+  const editarAtencion = (atencion) => {
+
+    setModoEdicion(true);
+
+    setAtencionEditando(atencion);
+
+    setFormAtencion({
+
+      fecha: atencion.fecha
+        ? atencion.fecha.slice(0, 16)
+        : "",
+
+      proximaVisita: atencion.proximaVisita
+        ? atencion.proximaVisita.slice(0, 10)
+        : "",
+
+      motivoConsulta:
+        atencion.motivoConsulta || "",
+
+      diagnostico:
+        atencion.diagnostico || "",
+
+      tratamiento:
+        atencion.tratamiento || "",
+
+      observaciones:
+        atencion.observaciones || "",
+
+      peso:
+        atencion.peso || "",
+
+      temperatura:
+        atencion.temperatura || "",
+
+      requiereSeguimiento:
+        atencion.requiereSeguimiento || false,
+
+      mascotaId: Number(id)
+    });
+
+    setMostrarModal(true);
+  };
+
   /**
    * Guardar atención
    */
@@ -123,13 +175,27 @@ export default function DetalleMascota() {
 
     try {
 
-      await crearAtencion(formAtencion);
+      if (modoEdicion) {
+
+      await actualizarAtencion(
+          atencionEditando.id,
+          formAtencion
+      );
+
+      } else {
+
+        await crearAtencion(formAtencion);
+      }
 
       // cerrar modal
       setMostrarModal(false);
 
+      setModoEdicion(false);
+
+      setAtencionEditando(null);
+
       // refrescar historial
-      cargarDatos();
+      await cargarDatos();
 
       // limpiar formulario
       setFormAtencion({
@@ -286,11 +352,31 @@ export default function DetalleMascota() {
 
                     </h3>
 
-                    <span className="text-gray-500">
+                    <div className="text-right">
 
-                      {a.fecha}
+                      <span className="text-gray-500 block">
 
-                    </span>
+                        {a.fecha}
+
+                      </span>
+
+                      <button
+                        onClick={() => editarAtencion(a)}
+                        className="
+                          mt-2
+                          bg-yellow-500
+                          hover:bg-yellow-600
+                          text-white
+                          px-3
+                          py-1
+                          rounded
+                          text-sm
+                        "
+                      >
+                        Editar
+                      </button>
+
+                    </div>
 
                   </div>
 
@@ -410,7 +496,9 @@ export default function DetalleMascota() {
 
                 <h2 className="text-2xl font-bold">
 
-                  Nueva Atención
+                  {modoEdicion
+                    ? "Editar Atención"
+                    : "Nueva Atención"}
 
                 </h2>
 
@@ -548,7 +636,10 @@ export default function DetalleMascota() {
                     hover:bg-green-700
                   "
                 >
-                  Guardar Atención
+                  {modoEdicion
+                    ? "Actualizar Atención"
+                    : "Guardar Atención"}
+                    
                 </button>
 
               </form>
